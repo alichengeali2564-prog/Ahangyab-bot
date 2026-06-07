@@ -35,7 +35,15 @@ def download_audio_from_url(url, output_path):
         ydl.download([url])
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("سلام! 🎵\nلینک ویدیو اینستاگرام یا یوتیوب رو بفرست تا آهنگشو پیدا کنم!")
+    await update.message.reply_text(
+        "سلام! 👋 به ربات آهنگ‌یاب خوش اومدی! 🎵\n\n"
+        "من می‌تونم آهنگ داخل ویدیوهات رو پیدا کنم!\n\n"
+        "📌 کافیه لینک ویدیو رو برام بفرستی:\n"
+        "• اینستاگرام 📸\n"
+        "• یوتیوب ▶️\n"
+        "• TikTok 🎵\n\n"
+        "بفرست تا آهنگشو پیدا کنم! 🔍"
+    )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
