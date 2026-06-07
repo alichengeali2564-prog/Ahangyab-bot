@@ -14,10 +14,10 @@ ACR_HOST = "eu-api-v2.acrcloud.com"
 ACR_ACCESS_KEY = "18029f6a2d960df0b36ffb4ea7053d4e"
 ACR_SECRET_KEY = "wbM7kNRYPkNm0JZKU54NnL4whulYbCayzIHBaCjW"
 RAPIDAPI_KEY = "844334089bmsh413282767d45677p1838efjsne56d44ad804c"
-RAPIDAPI_HOST = "instagram-reels-downloader-api.p.rapidapi.com"
+RAPIDAPI_HOST = "instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com"
 
 def download_instagram(url):
-    api_url = "https://instagram-reels-downloader-api.p.rapidapi.com/download"
+    api_url = f"https://{RAPIDAPI_HOST}/convert"
     headers = {"x-rapidapi-key": RAPIDAPI_KEY, "x-rapidapi-host": RAPIDAPI_HOST}
     params = {"url": url}
     response = requests.get(api_url, headers=headers, params=params, timeout=30)
