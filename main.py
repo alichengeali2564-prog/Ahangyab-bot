@@ -41,8 +41,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "سلام! 👋 به ربات آهنگ‌یاب خوش اومدی! 🎵\n\n"
         "من می‌تونم آهنگ داخل ویدیوهات رو پیدا کنم!\n\n"
-        "📌 کافیه لینک ویدیو رو برام بفرستی:\n"
-        "• اینستاگرام 📸\n\n"
+        "📌 کافیه لینک رील اینستاگرام رو برام بفرستی 📸\n\n"
         "بفرست تا آهنگشو پیدا کنم! 🔍"
     )
 
@@ -56,11 +55,51 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if 'instagram.com' in text:
             await msg.edit_text("📥 دارم ویدیو رو دانلود می‌کنم...")
             result = download_instagram(text)
-            await msg.edit_text(f"جواب API: {str(result)[:300]}")
-            return
+            
+            # پیدا کردن لینک ویدیو
+            video_url = None
+            media = result.get('media', [])
+            for item in media:
+                if item.get('type') == 'video':
+                    video_url = item.get('url')
+                    break
+            
+            if not video_url:
+                await msg.edit_text("❌ ویدیو پیدا نشد. مطمئن شو لینک ریل هست نه عکس!")
+                return
+            
+            # دانلود ویدیو
+            video_response = requests.get(video_url, timeout=60)
+            with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as f:
+                f.write(video_response.content)
+                tmp_path = f.name
+            
+            await msg.edit_text("🔍 دارم آهنگ رو شناسایی می‌کنم...")
+            acr_result = recognize_audio(tmp_path)
+            os.unlink(tmp_path)
+            
+            if acr_result.get('status', {}).get('code') == 0:
+                music = acr_result['metadata']['music'][0]
+                title = music.get('title', 'نامشخص')
+                artist = music['artists'][0]['name'] if music.get('artists') else 'نامشخص'
+                album = music.get('album', {}).get('name', '')
+                text_out = f"🎵 آهنگ پیدا شد!\n\n🎤 خواننده: {artist}\n🎼 عنوان: {title}"
+                if album:
+                    text_out += f"\n💿 آلبوم: {album}"
+                ext = music.get('external_metadata', {})
+                if 'spotify' in ext:
+                    sid = ext['spotify'].get('track', {}).get('id', '')
+                    if sid:
+                        text_out += f"\n🎧 Spotify: https://open.spotify.com/track/{sid}"
+                if 'youtube' in ext:
+                    vid = ext['youtube'].get('vid', '')
+                    if vid:
+                        text_out += f"\n▶️ YouTube: https://youtube.com/watch?v={vid}"
+                await msg.edit_text(text_out)
+            else:
+                await msg.edit_text("❌ آهنگ شناسایی نشد.")
         else:
             await msg.edit_text("❌ فقط اینستاگرام پشتیبانی میشه!")
-            return
     except Exception as e:
         await msg.edit_text(f"❌ خطا: {str(e)}")
 
