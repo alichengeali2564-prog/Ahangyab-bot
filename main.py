@@ -55,10 +55,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if 'instagram.com' in text:
             await msg.edit_text("📥 دارم ویدیو رو دانلود می‌کنم...")
             result = download_instagram(text)
-            
             data = result.get('data', {})
             keys = list(data.keys()) if isinstance(data, dict) else []
-            await msg.edit_text(f"کلیدهای data: {keys}\n\nمقدار اول: {str(data)[:300]}")
+            await msg.edit_text(f"کلیدها: {keys}")
             return
         else:
             await msg.edit_text("❌ فقط اینستاگرام پشتیبانی میشه!")
@@ -73,4 +72,4 @@ def main():
     app.run_polling()
 
 if __name__ == '__main__':
-    main()                    
+    main()
