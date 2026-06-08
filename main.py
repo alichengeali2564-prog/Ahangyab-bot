@@ -14,10 +14,10 @@ ACR_HOST = "eu-api-v2.acrcloud.com"
 ACR_ACCESS_KEY = "18029f6a2d960df0b36ffb4ea7053d4e"
 ACR_SECRET_KEY = "wbM7kNRYPkNm0JZKU54NnL4whulYbCayzIHBaCjW"
 RAPIDAPI_KEY = "844334089bmsh413282767d45677p1838efjsne56d44ad804c"
-RAPIDAPI_HOST = "instagram-downloader-download-instagram-stories-videos4.p.rapidapi.com"
+RAPIDAPI_HOST = "instagram-reels-downloader-api.p.rapidapi.com"
 
 def download_instagram(url):
-    api_url = f"https://{RAPIDAPI_HOST}/convert"
+    api_url = f"https://{RAPIDAPI_HOST}/download"
     headers = {"x-rapidapi-key": RAPIDAPI_KEY, "x-rapidapi-host": RAPIDAPI_HOST}
     params = {"url": url}
     response = requests.get(api_url, headers=headers, params=params, timeout=30)
@@ -41,7 +41,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "سلام! 👋 به ربات آهنگ‌یاب خوش اومدی! 🎵\n\n"
         "من می‌تونم آهنگ داخل ویدیوهات رو پیدا کنم!\n\n"
-        "📌 کافیه لینک رील اینستاگرام رو برام بفرستی 📸\n\n"
+        "📌 کافیه لینک ریل اینستاگرام رو برام بفرستی 📸\n\n"
         "بفرست تا آهنگشو پیدا کنم! 🔍"
     )
 
@@ -58,17 +58,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             # پیدا کردن لینک ویدیو
             video_url = None
-            media = result.get('media', [])
-            for item in media:
-                if item.get('type') == 'video':
-                    video_url = item.get('url')
-                    break
+            data = result.get('data', {})
+            if isinstance(data, dict):
+                video_url = data.get('video_url') or data.get('url')
+            elif isinstance(data, list):
+                for item in data:
+                    if item.get('type') == 'video':
+                        video_url = item.get('url')
+                        break
             
             if not video_url:
-                await msg.edit_text("❌ ویدیو پیدا نشد. مطمئن شو لینک ریل هست نه عکس!")
+                # نشون بده API چی برگردوند
+                await msg.edit_text(f"❌ ویدیو پیدا نشد. جواب: {str(result)[:200]}")
                 return
             
-            # دانلود ویدیو
             video_response = requests.get(video_url, timeout=60)
             with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as f:
                 f.write(video_response.content)
@@ -111,4 +114,4 @@ def main():
     app.run_polling()
 
 if __name__ == '__main__':
-    main()
+    main()            
